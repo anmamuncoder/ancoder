@@ -1,0 +1,38 @@
+services:
+  ancoder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ancoder_app_
+    restart: unless-stopped
+    ports:
+      - "8091:80"
+    networks:
+      - ancoder_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  ancoder_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ancoder_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_APP_NAME=anCoder
+    networks:
+      - ancoder_net
+    profiles:
+      - dev
+
+networks:
+  ancoder_net:
+    driver: bridge
